@@ -33,7 +33,7 @@ function readFiles(dir) {
     let result = new Set(arr[0]);
     for (let i = 1; i < arr.length; i++) {
       const fileSet = new Set(arr[i]);
-      result = new Set([...fileSet].filter((i) => result.has(i)));
+      result = new Set([...fileSet].filter((v) => result.has(v)));
     }
     console.log(`Exist in all files: ${result.size}`);
   }
