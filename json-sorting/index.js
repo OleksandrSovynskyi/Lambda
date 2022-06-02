@@ -23,54 +23,56 @@ const urlList = [
   "https://jsonbase.com/lambdajson_type4/64",
 ];
 
-async function getInfo() {
-  const arrTrue = [];
-  const arrFalse = [];
-  for (let i = 0; i < urlList.length; i++) {
-    try {
-      const response = await axios.get(urlList[i]);
-      if (
-        response.data.isDone === undefined &&
-        response.data.location.isDone === undefined &&
-        response.data.higherEducation.isDone === undefined
-      ) {
-        console.log("isDone was not found");
-      } else {
-        if (response.data.isDone === undefined) {
-          if (response.data.location.isDone === undefined) {
-            console.log(
-              `${urlList[i]}: isDone - ${response.data.higherEducation.isDone}`
-            );
-            if (response.data.higherEducation.isDone === true) {
-              arrTrue.push(response.data.higherEducation.isDone);
-            } else {
-              arrFalse.push(response.data.higherEducation.isDone);
-            }
-          } else {
-            console.log(
-              `${urlList[i]}: isDone - ${response.data.location.isDone}`
-            );
-            if (response.data.location.isDone === true) {
-              arrTrue.push(response.data.location.isDone);
-            } else {
-              arrFalse.push(response.data.location.isDone);
-            }
-          }
-        } else {
-          console.log(`${urlList[i]}: isDone - ${response.data.isDone}`);
-          if (response.data.isDone === true) {
-            arrTrue.push(response.data.isDone);
-          } else {
-            arrFalse.push(response.data.isDone);
-          }
-        }
+async function getResponse(url) {
+  let response = null;
+  const retries = 3;
+  let i = 0;
+  do {
+    i++;
+    response = await axios.get(url);
+  } while (response.status != 200 && i <= retries);
+  if (response.status >= 400) {
+    console.log("Error");
+  } else {
+    return response.data;
+  }
+}
+
+async function checkResponse(resData) {
+  const data = await resData;
+  if (typeof data === "object" && data !== null) {
+    if (data.isDone !== undefined) {
+      return data.isDone;
+    }
+
+    for (let element of Object.values(data)) {
+      result = await checkResponse(element);
+      if (typeof result === "boolean") {
+        return result;
       }
-    } catch (error) {
-      console.error(error);
     }
   }
-  console.log(`Values True: ${arrTrue.length},`);
-  console.log(`Values False: ${arrFalse.length}`);
+}
+
+async function getInfo() {
+  let countTrue = 0;
+  let countFalse = 0;
+  for (let i = 0; i < urlList.length; i++) {
+    let response = getResponse(urlList[i]);
+    let isDoneValue = await checkResponse(response);
+    if (isDoneValue === undefined) {
+      console.log("isDone was not found");
+    } else {
+      console.log(`${urlList[i]}: isDone - ${isDoneValue}`);
+      if (isDoneValue === true) {
+        countTrue++;
+      } else {
+        countFalse++;
+      }
+    }
+  }
+  console.log(`Values True: ${countTrue},`);
+  console.log(`Values False: ${countFalse}`);
 }
 
 getInfo();

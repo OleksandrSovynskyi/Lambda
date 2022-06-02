@@ -10,7 +10,7 @@ function vacationList(vac) {
       const map = result.get(el.user._id);
       map["weekendDates"].push({
         startDate: el.startDate,
-        endDate: el.endDate,
+        endDate: el.endDate,        
       });
     } else {
       result.set(el.user._id, {
