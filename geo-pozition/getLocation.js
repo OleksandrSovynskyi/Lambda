@@ -11,6 +11,6 @@ async function getResponse(url) {
     }
 }
 
-getResponse('https://0040-185-42-129-50.eu.ngrok.io/getLocation');
+getResponse('https://443f-5-199-232-144.eu.ngrok.io/getLocation');
 
 
